@@ -1,0 +1,38 @@
+.title h3{
+    text-align: center;
+    color: #212EA0;
+    font-size: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin: 70px 0 30px;
+}
+.title h2{
+    font-size: 32px;
+    color: #000F38;
+    margin-top: 5px;
+    text-transform: none;
+}
+.title p{
+    font-size: 30px;
+        color: #000F38;
+        margin-left: 25px;
+        margin-right: 25px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        text-transform: none;
+       
+        text-align: center;
+}
+@media (max-width: 768px){
+.title p {
+        font-size: 20px;
+        color: #000F38;
+        margin-left: 25px;
+        margin-right: 25px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        text-transform: none;
+
+        text-align: center;
+    }
+}

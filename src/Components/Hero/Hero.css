@@ -1,0 +1,84 @@
+.hero {
+    width: 100%;
+    min-height: 100vh;
+    background: linear-gradient(rgba(8, 0, 58, 0.7), rgba(8, 0, 58, 0.7)), url('../../assets/hero.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.hero-text {
+    text-align: center;
+    color: white;
+    max-width: 800px;
+    width: 100%;
+}
+
+.hero-text h1 {
+    font-size: clamp(30px, 5vw, 60px);
+    font-weight: 600;
+    color:white;
+    margin: 0 0 20px 0;
+    line-height: 1.2;
+}
+
+.hero-text p {
+    font-size: clamp(16px, 2vw, 18px);
+    max-width: 700px;
+    color: white;
+    margin: 0 auto 20px;
+    line-height: 1.4;
+}
+
+
+@media (max-width: 768px) {
+        .hero {
+            width: 100vw;
+            min-height: 100vh;
+            background: linear-gradient(rgba(8, 0, 58, 0.7), rgba(8, 0, 58, 0.7)), url('../../assets/hero.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            /* Ensure the background is fixed */
+            display: flex;
+            flex-direction: column;
+            /* Stack content on mobile */
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 10px;
+            box-sizing: border-box;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .hero-text {
+            width: 100%;
+            /* Ensure it takes full width */
+            max-width: 90%;
+            /* Restrict maximum width for readability */
+            text-align: center;
+            margin: 0 auto;
+            /* Center the text block */
+        }
+
+        .hero-text h1 {
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            /* Adjust heading font size */
+        }
+
+        .hero-text p {
+            margin-bottom: 30px;
+            font-size: 1em;
+            /* Adjust paragraph font size */
+        }
+    }

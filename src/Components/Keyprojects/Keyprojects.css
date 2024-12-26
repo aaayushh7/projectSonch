@@ -1,0 +1,146 @@
+.snch-news {
+    background-color: #f3f4f6;
+    min-height: 100vh;
+    padding: 3rem 0;
+    border-radius: 0%;
+}
+
+.snch-news-container {
+    max-width: 1400px;
+    margin: 0 auto;
+   
+    padding: 0 2rem;
+}
+
+.snch-news-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 4rem;
+    color: #212EA0;
+}
+
+.snch-news-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
+
+.snch-card {
+    background-color: white;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    height: 300px;
+    border-radius: 0.75rem;
+}
+
+.snch-card-image-container {
+    flex: 0 0 38%;
+}
+
+.snch-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.snch-card-content {
+    flex: 1;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.snch-card-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #212EA0;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+
+.snch-card-text {
+    color: #4A5568;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    flex-grow: 1;
+}
+
+.snch-card-button {
+    background-color: #212EA0;
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 2rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    align-self: flex-start;
+    border-radius: 9999px;
+    font-size: 1rem;
+}
+
+.snch-card-button:hover {
+    background-color: #1a248c;
+}
+
+@media (max-width: 768px) {
+    .snch-news {
+        padding: 2rem 0;
+    }
+
+    .snch-news-container {
+        padding: 0 1rem;
+    }
+
+    .snch-news-title {
+        font-size: 2rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .snch-news-grid {
+        gap: 2rem;
+    }
+
+    .snch-card {
+        flex-direction: column;
+        height: auto;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .snch-card-image-container {
+        height: 250px;
+        width: 100%;
+    }
+
+    .snch-card-image {
+        height: 300px;
+        width: 100%;
+        object-fit: cover;
+    }
+
+    .snch-card-content {
+        padding: 1.5rem;
+    }
+
+    .snch-card-title {
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .snch-card-text {
+        font-size: 1rem;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+    }
+
+    .snch-card-button {
+        width: 100%;
+        text-align: center;
+        padding: 0.875rem;
+        font-size: 1rem;
+        align-self: center;
+    }
+}
