@@ -16,6 +16,9 @@ import Gallery from './Components/Gallary/Gallery'
 import News from './Components/News/News'
 import Readmore from './Components/Readmore/Readmore'
 import Keyprojects from './Components/Keyprojects/Keyprojects'
+import Keymore2 from './Components/Keymore/Keymore2'
+import Keymore3 from './Components/Keymore/Keymore3'
+
 import Keymore from './Components/Keymore/Keymore'
 
 const App = () => {
@@ -55,6 +58,10 @@ const App = () => {
             <Route path="/sonch-in-news/readmore" element={<ReadmorePage />} />
             <Route path="/keyprojects" element={<Keyprojects />} />
             <Route path="/keymore" element={<Keymore/>} />
+            <Route path="/keymore2" element={<Keymore2/>} />
+            <Route path="/keymore3" element={<Keymore3/>} />
+
+
           </Routes>
         </div>
         <Footer />
