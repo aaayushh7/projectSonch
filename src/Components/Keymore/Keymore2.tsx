@@ -53,9 +53,9 @@ export default function Component() {
         <div className="container-keymore">
           <div className="her-content">
             <div className="her-text">
-              <h1>Empowering Communities Through Key Projects
+              <h1 className='text-xl pb-4 uppercase font-semibold'>Digital literacy centres
               </h1>
-              <p>Join us in our mission to create lasting positive change in communities worldwide.</p>
+              <p className='text-justify text-[16px] font-light'>Digital Literacy CentresSONCH has established Digital Literacy Centres to bridge the digital divide and empower individuals with essential technological skills. These centres provide training in basic computer operations, internet usage, and digital tools, enabling participants to enhance their employability and adapt to the modern digital landscape. This initiative equips communities to access opportunities and resources more effectively</p>
             
             </div>
             <div className="her-image">

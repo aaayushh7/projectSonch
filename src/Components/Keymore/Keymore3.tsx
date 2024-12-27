@@ -53,9 +53,9 @@ export default function Component() {
         <div className="container-keymore">
           <div className="her-content">
             <div className="her-text">
-              <h1>Empowering Communities Through Key Projects
+              <h1 className='text-xl pb-4 uppercase font-semibold'>Women Empowerment
               </h1>
-              <p>Join us in our mission to create lasting positive change in communities worldwide.</p>
+              <p className='text-justify text-[16px] font-light'>Women Empowerment ProjectsSONCH's Women Empowerment Projects aim to uplift women by promoting financial independence, leadership, and active participation in decision-making processes. Through partnerships with Women Self-Help Groups (SHGs), the initiative provides training, resources, and mentorship to help women lead socio-economic transformations within their communities, fostering a more equitable and inclusive society.</p>
             
             </div>
             <div className="her-image">

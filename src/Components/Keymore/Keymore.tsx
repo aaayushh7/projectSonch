@@ -53,8 +53,8 @@ export default function Component() {
         <div className="container-keymore">
           <div className="her-content">
             <div className="her-text">
-              <h1>Empowering Communities Through Key Projects</h1>
-              <p>Join us in our mission to create lasting positive change in communities worldwide.</p>
+              <h1 className='text-xl font-semibold pb-4 uppercase'>Plantation projects</h1>
+              <p className='text-justify text-[16px] font-light'>Under the 'Harit Pradesh Harit Desh' initiative, NGO Soch planted 30,000 saplings, including fruit-bearing and timber trees, across various districts of Bihar and Jharkhand in the past six months. The program aims to raise environmental awareness and promote sustainable development among communities. Members of the organization actively participated in nurturing the saplings, emphasizing the importance of ecological balance. As the article states संस्था लोगों के बीच एक सहजान समझ विकसित करना चाह रही है highlighting Soch's commitment to fostering a deeper understanding of environmental conservation through collective and impactful actions.</p>
             
             </div>
             <div className="her-image">
