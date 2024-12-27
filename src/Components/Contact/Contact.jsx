@@ -39,10 +39,10 @@ const Contact = () => {
     <div className='contact'>
       <div className="contact-col">
         <h3>Send us a message <img src={msg_icon} alt="" /></h3>
-        <p>Feel free to reach out through contact form or find our contact information below. Your feedback, questions, and suggestions are important to us as we strive to provide exceptional service to our university community.</p>
+        <p className=''>Feel free to reach out through contact form or find our contact information below. Your feedback, questions, and suggestions are important to us as we strive to provide exceptional service to our university community.</p>
         <ul>
         <li><img src={mail_icon} alt="" />admin@sonch.org.in</li>
-            <li><img src={phone_icon} alt="" />+91-674-2311444</li>
+            <li><img src={phone_icon} alt="" />+91-7781010314 , +91-7004175673</li>
             <li><img src={location_icon} alt="" />A2 Lakhan Vishwanath Apartment, Shanti Vihar Colony, near Poonam Gas Agency,<br/>Ambedkar Path, Bailey Road, Patna 800014</li>
         </ul>
       </div>
