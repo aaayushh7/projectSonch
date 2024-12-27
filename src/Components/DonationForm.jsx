@@ -76,7 +76,7 @@ const DonationForm = () => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto mr-2 ml-5">
+    <div className="w-full max-w-md mx-auto mr-2">
       <Button 
         onClick={() => setIsModalOpen(true)}
         className="w-full bg-yellow-300 hover:bg-white text-gray-600 mr-4 font-semibold py-3 rounded-full shadow-md transition-colors"
