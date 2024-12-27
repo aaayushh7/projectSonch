@@ -8,7 +8,6 @@ import {
 } from "../Components/ui/dialog";
 import { Input } from "../Components/ui/input";
 import { Button } from "../Components/ui/button";
-// import { X } from "lucide-react";
 
 const DonationForm = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,49 +15,60 @@ const DonationForm = () => {
   const [processing, setProcessing] = useState(false);
 
   const handleDonation = async (finalAmount) => {
-    setProcessing(true);
-    
-    const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-      amount: finalAmount * 100,
-      currency: 'INR',
-      name: 'Sonch',
-      description: 'Donation',
-      image: '',
-      handler: function(response) {
-        const paymentDetails = {
-          paymentId: response.razorpay_payment_id,
-          amount: finalAmount,
-          currency: 'INR',
-          timestamp: new Date().toISOString()
-        };
-        
-        const donations = JSON.parse(localStorage.getItem('donations') || '[]');
-        donations.push(paymentDetails);
-        localStorage.setItem('donations', JSON.stringify(donations));
-        
-        alert('Thank you for your donation! Payment ID: ' + response.razorpay_payment_id);
-        setIsModalOpen(false);
-        setAmount('');
-      },
-      prefill: {
-        name: '',
-        email: '',
-        contact: ''
-      },
-      theme: {
-        color: '#2563eb'
-      },
-      modal: {
-        ondismiss: function() {
-          setProcessing(false);
-        }
-      }
-    };
-
     try {
+      setProcessing(true);
+      
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: finalAmount * 100,
+        currency: 'INR',
+        name: 'Sonch',
+        description: 'Donation',
+        image: '',
+        handler: function(response) {
+          const paymentDetails = {
+            paymentId: response.razorpay_payment_id,
+            amount: finalAmount,
+            currency: 'INR',
+            timestamp: new Date().toISOString()
+          };
+          
+          const donations = JSON.parse(localStorage.getItem('donations') || '[]');
+          donations.push(paymentDetails);
+          localStorage.setItem('donations', JSON.stringify(donations));
+          
+          alert('Thank you for your donation! Payment ID: ' + response.razorpay_payment_id);
+          setIsModalOpen(false);
+          setAmount('');
+          setProcessing(false);
+        },
+        prefill: {
+          name: '',
+          email: '',
+          contact: ''
+        },
+        theme: {
+          color: '#2563eb'
+        },
+        modal: {
+          ondismiss: function() {
+            setProcessing(false);
+          }
+        }
+      };
+
+      // Initialize Razorpay first
       const rzp = await initializeRazorpay(options);
-      rzp.open();
+      
+      // Close our modal before opening Razorpay
+      setIsModalOpen(false);
+      
+      // Small delay to ensure our modal is closed
+      setTimeout(() => {
+        // Then open Razorpay
+        rzp.open();
+      }, 100);
+
     } catch (error) {
       console.error('Error:', error);
       alert('Payment initialization failed. Please try again.');
@@ -84,19 +94,20 @@ const DonationForm = () => {
         Donate
       </Button>
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <Dialog 
+        open={isModalOpen} 
+        onOpenChange={(open) => {
+          if (!processing) {
+            setIsModalOpen(open);
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-md border rounded-lg shadow-lg">
           <div className="relative">
             <DialogHeader className="px-6 pt-6 pb-4">
               <DialogTitle className="text-xl font-semibold text-gray-900">
                 Make a Donation
               </DialogTitle>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="absolute right-4 top-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
-              >
-                {/* <X className="h-5 w-5 text-gray-500" /> */}
-              </button>
             </DialogHeader>
 
             <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-5">

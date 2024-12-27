@@ -9,7 +9,7 @@
 .footer ul li{
     list-style: none;
     display: inline-block;
-    margin-left: 20px;
+    margin: 20px;
 }
 /* ------ media query ---------- */
 @media (max-width: 600px){
