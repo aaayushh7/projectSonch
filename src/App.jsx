@@ -96,7 +96,7 @@ const Home = ({ setPlayState }) => (
 
 const AboutPage = ({ setPlayState, founderRef, organisationRef, journeyRef, valuesRef }) => (
   <>
-    <Title title='About us' />
+    <Title subTitle='About us' />
     <About 
       setPlayState={setPlayState} 
       founderRef={founderRef} 
