@@ -6,7 +6,7 @@
 
 .about,
 .founder {
-    margin: 100px 0;
+    margin: 20px 0;
 }
 
 .about h3,
@@ -78,7 +78,7 @@
 @media (max-width: 768px) {
         .about,
         .founder {
-            margin: 100px 0;
+            margin: 10px 0;
         }
     .founder-profile {
         flex-direction: column;
