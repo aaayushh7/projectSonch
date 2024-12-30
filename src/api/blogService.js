@@ -1,38 +1,77 @@
 import axios from 'axios';
 
-const API_URL = 'https://api-sonch.vercel.app/api';
+const API_URL = 'http://localhost:4000/api';
 
-axios.interceptors.request.use(config => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
+// Create an axios instance with default config
+const axiosInstance = axios.create({
+  baseURL: API_URL,
 });
 
+// Add request interceptor to the instance
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+      // Also ensure content-type is set for non-form-data requests
+      if (!config.headers['Content-Type'] && !(config.data instanceof FormData)) {
+        config.headers['Content-Type'] = 'application/json';
+      }
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor to handle auth errors
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 403 || error.response?.status === 401) {
+      // Clear stored data on auth errors
+      localStorage.removeItem('token');
+      sessionStorage.removeItem('blogData');
+      // You might want to redirect to login or show a message
+    }
+    return Promise.reject(error);
+  }
+);
+
 const getAllBlogs = async () => {
-  const response = await axios.get(`${API_URL}/blogs`);
+  const response = await axiosInstance.get('/blogs');
   sessionStorage.setItem('blogData', JSON.stringify(response.data));
   return response.data;
 };
 
 export const blogService = {
   login: async (email, password) => {
-    const response = await axios.post(`${API_URL}/auth/login`, { email, password });
+    const response = await axiosInstance.post('/auth/login', { email, password });
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);
     }
     return response.data;
   },
 
-  logout: () => {
-    localStorage.removeItem('token');
+  logout: async () => {
+    try {
+      // Add a call to your logout endpoint if you have one
+      // await axiosInstance.post('/auth/logout');
+      localStorage.removeItem('token');
+      sessionStorage.removeItem('blogData');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Still remove token even if logout request fails
+      localStorage.removeItem('token');
+      sessionStorage.removeItem('blogData');
+    }
   },
 
   uploadImage: async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await axios.post(`${API_URL}/upload`, formData, {
+    const response = await axiosInstance.post('/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -47,14 +86,14 @@ export const blogService = {
 
   deleteImage: async (fileId) => {
     if (!fileId) return;
-    const response = await axios.delete(`${API_URL}/images/${fileId}`);
+    const response = await axiosInstance.delete(`/images/${fileId}`);
     return response.data;
   },
 
   getAllBlogs,
 
   getBlogById: async (id) => {
-    const response = await axios.get(`${API_URL}/blogs/${id}`);
+    const response = await axiosInstance.get(`/blogs/${id}`);
     return response.data;
   },
 
@@ -66,7 +105,7 @@ export const blogService = {
         imageId = imageResponse.fileId;
       }
 
-      const response = await axios.post(`${API_URL}/blogs`, {
+      const response = await axiosInstance.post('/blogs', {
         ...blogData,
         bannerId: imageId
       });
@@ -88,7 +127,7 @@ export const blogService = {
         imageId = imageResponse.fileId;
       }
 
-      const response = await axios.put(`${API_URL}/blogs/${id}`, {
+      const response = await axiosInstance.put(`/blogs/${id}`, {
         ...blogData,
         bannerId: imageId
       });
@@ -103,10 +142,24 @@ export const blogService = {
   },
 
   deleteBlog: async (id) => {
-    const response = await axios.delete(`${API_URL}/blogs/${id}`);
-    sessionStorage.removeItem('blogData');
-    await getAllBlogs();
-    return response.data;
+    try {
+      // Verify token exists before attempting delete
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authorization token found');
+      }
+
+      const response = await axiosInstance.delete(`/blogs/${id}`);
+      sessionStorage.removeItem('blogData');
+      await getAllBlogs();
+      return response.data;
+    } catch (error) {
+      console.error('Error in deleteBlog:', error);
+      if (error.response?.status === 403) {
+        throw new Error('Not authorized to delete this blog');
+      }
+      throw error;
+    }
   }
 };
 

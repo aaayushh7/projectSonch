@@ -62,6 +62,7 @@ export const BlogPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showAdminMenu, setShowAdminMenu] = useState(false);
   const [loginData, setLoginData] = useState({ email: '', password: '' });
 
   const loadBlogs = async () => {
@@ -99,25 +100,30 @@ export const BlogPage = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('blogData');
+    setIsAdmin(false);
+    setShowAdminMenu(false);
+  };
+
   return (
-    <div className="min-h-screen  bg-gray-200">
+    <div className="min-h-screen bg-gray-200">
       <div className="max-w-full mx-auto">
-      <h1
-  className="text-4xl font-bold text-blue-800 text-center mb-7 flex items-center justify-center h-[150px] md:h-[250px]"
-  style={{
-    backgroundImage: `url(${bg})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    color: 'white',
-    padding: '1rem',
-    borderRadius: '',
-    textShadow: '2px 2px 4px rgba(0, 0, 0, 0.6)',
-    width: '100%', // Ensures the element takes up the full width of its container
-  // You can adjust the height as needed
-  }}
->
-  SONCH Blog
-</h1>
+        <h1
+          className="text-4xl font-bold text-blue-800 text-center mb-7 flex items-center justify-center h-[150px] md:h-[250px]"
+          style={{
+            backgroundImage: `url(${bg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            color: 'white',
+            padding: '1rem',
+            textShadow: '2px 2px 4px rgba(0, 0, 0, 0.6)',
+            width: '100%',
+          }}
+        >
+          SONCH Blog
+        </h1>
     
         <div className="grid md:grid-cols-1 lg:grid-cols-1 p-6 gap-6">
           {isLoading ? (
@@ -131,22 +137,46 @@ export const BlogPage = () => {
           )}
         </div>
 
-        {isAdmin ? (
-          <Link
-            to="/blog/new"
-            className="fixed bottom-8 right-8 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
-          >
-            <i className="fas fa-plus"></i>
-          </Link>
-        ) : (
-          <button
-            className="fixed bottom-8 right-8 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
-            onClick={() => setShowLoginModal(true)}
-          >
-            <i className="fas fa-plus"></i>
-          </button>
-        )}
+        {/* Admin Menu Button */}
+        <div className="fixed bottom-8 right-8">
+          {isAdmin ? (
+            <div className="relative">
+              <button
+                className="bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+                onClick={() => setShowAdminMenu(!showAdminMenu)}
+              >
+                <i className="fas fa-plus"></i>
+              </button>
+              
+              {/* Admin Menu Popup */}
+              {showAdminMenu && (
+                <div className="absolute bottom-16 right-0 bg-white rounded-lg shadow-lg overflow-hidden w-48">
+                  <Link
+                    to="/blog/new"
+                    className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                  >
+                    New Post
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full px-4 py-2 text-left text-red-600 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              className="bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+              onClick={() => setShowLoginModal(true)}
+            >
+              <i className="fas fa-plus"></i>
+            </button>
+          )}
+        </div>
 
+        {/* Login Modal */}
         {showLoginModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
             <div className="bg-white rounded-lg p-8 max-w-md w-full">
