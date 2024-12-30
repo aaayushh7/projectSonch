@@ -43,12 +43,12 @@ const BlogCard = ({ blog }) => {
       </div>
       <div className="w-2/3 pl-3 flex flex-col justify-between">
         <div>
-          <h2 className="sm:text-xl text-md font-semibold text-gray-800 line-clamp-1 text-left">{blog.title}</h2>
-          <p className="text-gray-600 line-clamp-3 text-sm sm:text-md">{preview}</p>
+          <h2 className="sm:text-2xl text-md font-semibold text-gray-800 line-clamp-1 text-left">{blog.title}</h2>
+          <p className="text-gray-600 line-clamp-3 text-sm sm:text-xl">{preview}</p>
         </div>
         <Link
           to={`/blog/${blog._id}`}
-          className="text-blue-600 hover:text-blue-800 font-medium mt-2 text-xs sm:text-md inline-block"
+          className="text-blue-600 hover:text-blue-800 font-medium mt-2 text-xs sm:text-xl inline-block"
         >
           Read More →
         </Link>
