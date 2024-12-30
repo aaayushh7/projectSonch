@@ -1,7 +1,7 @@
 // src/api/blogService.js
 import axios from 'axios';
 
-const API_URL = 'http://api-sonch.vercel.app/api';
+const API_URL = 'https://api-sonch.vercel.app/api';
 
 // Add token to requests if it exists
 axios.interceptors.request.use(config => {
