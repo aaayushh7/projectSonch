@@ -8,6 +8,7 @@ export const BlogPost = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
+  const API_URL = 'https://api-sonch.vercel.app/api';
 
   useEffect(() => {
     loadBlog();
@@ -35,16 +36,35 @@ export const BlogPost = () => {
     }
   };
 
-  if (!blog) return (
-    <div className="flex justify-center items-center h-64">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
-    </div>
-  );
+  if (!blog) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-4xl font-bold text-blue-800 mb-4">{blog.title}</h1>
-      <div className="flex gap-4 text-gray-600 mb-8">
+      {/* Banner Image */}
+      {blog.bannerId && (
+        <img
+          src={`${API_URL}/images/${blog.bannerId}`}
+          alt={blog.title}
+          className="w-full rounded-lg mb-6 object-cover"
+          style={{ maxHeight: '400px' }}
+          onError={(e) => {
+            e.target.src = 'https://via.placeholder.com/800x400';
+            e.target.onerror = null;
+          }}
+        />
+      )}
+
+      {/* Blog Title */}
+      <h1 className="text-4xl font-bold text-center text-blue-800 mb-4">{blog.title}</h1>
+
+      {/* Blog Meta Information */}
+      <div className="flex justify-center gap-4 text-gray-600 mb-8">
         <span className="flex items-center">
           <i className="fas fa-user mr-2"></i>
           {blog.author}
@@ -54,12 +74,37 @@ export const BlogPost = () => {
           {new Date(blog.createdAt).toLocaleDateString()}
         </span>
       </div>
-      <div 
-        className="prose prose-lg max-w-none ql-editor"
+
+      {/* Blog Content */}
+      <div
+        className="prose prose-lg text-justify mx-auto ql-editor"
         dangerouslySetInnerHTML={{ __html: blog.content }}
       />
+
+      {/* Styling for Justification */}
+      <style>{`
+        .ql-editor img {
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
+        }
+        .prose {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        .prose > * {
+          width: 100%;
+          text-align: justify;
+        }
+        .prose img {
+          margin: 2rem auto;
+        }
+      `}</style>
+
+      {/* Admin Controls */}
       {isAdmin && (
-        <div className="flex gap-4 mt-8">
+        <div className="flex justify-center gap-4 mt-8">
           <button
             onClick={() => navigate(`/blog/edit/${id}`)}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
