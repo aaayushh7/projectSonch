@@ -11,6 +11,9 @@ import Campus from './Components/Campus/Campus'
 import Testimonials from './Components/Testimonials/Testimonials'
 import Contact from './Components/Contact/Contact'
 import Footer from './Components/Footer/Footer'
+import { BlogPage } from './Components/Blog/BlogPage';
+import { BlogEditor } from './Components/Blog/BlogEditor';
+import { BlogPost } from './Components/Blog/BlogPost';
 
 import Gallery from './Components/Gallary/Gallery'
 import News from './Components/News/News'
@@ -31,23 +34,23 @@ const App = () => {
   return (
     <Router>
       <div>
-        <Navbar 
-          founderRef={founderRef} 
-          organisationRef={organisationRef} 
-          journeyRef={journeyRef} 
-          valuesRef={valuesRef} 
+        <Navbar
+          founderRef={founderRef}
+          organisationRef={organisationRef}
+          journeyRef={journeyRef}
+          valuesRef={valuesRef}
         />
-   
+
         <div className="container">
           <Routes>
             <Route path="/" element={<Home setPlayState={setPlayState} />} />
             <Route path="/programs" element={<ProgramsPage />} />
-            <Route path="/about" element={<AboutPage 
-              setPlayState={setPlayState} 
-              founderRef={founderRef} 
-              organisationRef={organisationRef} 
-              journeyRef={journeyRef} 
-              valuesRef={valuesRef} 
+            <Route path="/about" element={<AboutPage
+              setPlayState={setPlayState}
+              founderRef={founderRef}
+              organisationRef={organisationRef}
+              journeyRef={journeyRef}
+              valuesRef={valuesRef}
             />} />
             <Route path="/campus" element={<CampusPage />} />
             <Route path="/testimonials" element={<TestimonialsPage />} />
@@ -57,15 +60,19 @@ const App = () => {
             <Route path="/sonch-in-news" element={<NewsPage />} />
             <Route path="/sonch-in-news/readmore" element={<ReadmorePage />} />
             <Route path="/keyprojects" element={<Keyprojects />} />
-            <Route path="/keymore" element={<Keymore/>} />
-            <Route path="/keymore2" element={<Keymore2/>} />
-            <Route path="/keymore3" element={<Keymore3/>} />
+            <Route path="/keymore" element={<Keymore />} />
+            <Route path="/keymore2" element={<Keymore2 />} />
+            <Route path="/keymore3" element={<Keymore3 />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/new" element={<BlogEditor />} />
+            <Route path="/blog/edit/:id" element={<BlogEditor />} />
+            <Route path="/blog/:id" element={<BlogPost />} />
 
 
           </Routes>
         </div>
         <Footer />
-        
+
       </div>
     </Router>
   )
@@ -74,15 +81,15 @@ const App = () => {
 const Home = ({ setPlayState }) => (
   <>
     <Hero />
-    
-    
-    
+
+
+
     <Title subTitle='Gallery' title='Our Journey' />
 
     <Campus />
 
     <Programs />
-    <Title intro='SONCH is a socially driven organization dedicated to empowering individuals and fostering sustainable community development. With a focus on education, skill-building, digital literacy, women empowerment, health, and environmental sustainability, we strive to create opportunities for growth and self-reliance. SONCH works collaboratively to address social challenges, promote equity, and enhance quality of life, guided by the principles of inclusion, dignity, and progress. Through innovative programs and grassroots efforts, we aim to inspire hope and build resilient communities for a better tomorrow.'  />
+    <Title intro='SONCH is a socially driven organization dedicated to empowering individuals and fostering sustainable community development. With a focus on education, skill-building, digital literacy, women empowerment, health, and environmental sustainability, we strive to create opportunities for growth and self-reliance. SONCH works collaboratively to address social challenges, promote equity, and enhance quality of life, guided by the principles of inclusion, dignity, and progress. Through innovative programs and grassroots efforts, we aim to inspire hope and build resilient communities for a better tomorrow.' />
 
     <Timeline />
     <Title subTitle='OUR IMPACT' title='What we have achieved' />
@@ -97,12 +104,12 @@ const Home = ({ setPlayState }) => (
 const AboutPage = ({ setPlayState, founderRef, organisationRef, journeyRef, valuesRef }) => (
   <>
     <Title subTitle='About us' />
-    <About 
-      setPlayState={setPlayState} 
-      founderRef={founderRef} 
-      organisationRef={organisationRef} 
-      journeyRef={journeyRef} 
-      valuesRef={valuesRef} 
+    <About
+      setPlayState={setPlayState}
+      founderRef={founderRef}
+      organisationRef={organisationRef}
+      journeyRef={journeyRef}
+      valuesRef={valuesRef}
     />
   </>
 )
@@ -135,20 +142,20 @@ const ContactPage = () => (
 )
 const GalleryPage = () => (
   <>
-   
-    <Gallery/>
+
+    <Gallery />
   </>
 )
 const NewsPage = () => (
   <>
-   
-    <News/>
+
+    <News />
   </>
 )
 const ReadmorePage = () => (
   <>
-   
-    <Readmore/>
+
+    <Readmore />
   </>
 )
 

@@ -105,6 +105,7 @@ export default function Component({ founderRef, organisationRef, journeyRef, val
           </li>
           <li><Link to="/Keyprojects" onClick={handleNavItemClick}>Projects</Link></li>
           <li><Link to="/gallery" onClick={handleNavItemClick}>Gallery</Link></li>
+          <li><Link to="/blog" onClick={handleNavItemClick}>Blog</Link></li>
           <li><Link to="/sonch-in-news" onClick={handleNavItemClick}>Sonch in News</Link></li>
           <li><Link to="/contact" className='' onClick={handleNavItemClick}>Contact us</Link></li>
           <li><DonationForm /></li>
