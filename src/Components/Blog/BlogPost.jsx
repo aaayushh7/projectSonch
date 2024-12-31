@@ -3,26 +3,86 @@ import { useParams, useNavigate } from 'react-router-dom';
 import blogService from '../../api/blogService';
 import 'react-quill/dist/quill.snow.css';
 
+// Queue manager for image loading (remains the same)
+class ImageLoadQueue {
+  constructor() {
+    this.queue = [];
+    this.isProcessing = false;
+  }
+
+  add(task) {
+    this.queue.push(task);
+    this.processNext();
+  }
+
+  async processNext() {
+    if (this.isProcessing || this.queue.length === 0) return;
+    
+    this.isProcessing = true;
+    const currentTask = this.queue.shift();
+    
+    try {
+      await currentTask();
+    } catch (error) {
+      console.error('Error processing image:', error);
+    }
+    
+    this.isProcessing = false;
+    this.processNext();
+  }
+}
+
+const imageQueue = new ImageLoadQueue();
+
 const ImageWithFallback = ({ src, alt, className, style }) => {
   const [imageError, setImageError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const MAX_RETRIES = 3;
+  const RETRY_DELAY = 1000;
 
-  const handleError = useCallback(() => {
-    if (retryCount < MAX_RETRIES) {
-      setTimeout(() => {
-        setRetryCount(prev => prev + 1);
+  const loadImage = useCallback(() => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = `${src}?retry=${retryCount}`;
+      
+      img.onload = () => {
+        setIsLoading(false);
         setImageError(false);
-      }, 1000 * (retryCount + 1));
-    } else {
-      setImageError(true);
-    }
-  }, [retryCount]);
+        resolve();
+      };
+
+      img.onerror = () => {
+        if (retryCount < MAX_RETRIES) {
+          setTimeout(() => {
+            setRetryCount(prev => prev + 1);
+            imageQueue.add(() => loadImage());
+          }, RETRY_DELAY * (retryCount + 1));
+        } else {
+          setImageError(true);
+          setIsLoading(false);
+        }
+        resolve();
+      };
+    });
+  }, [src, retryCount]);
+
+  useEffect(() => {
+    imageQueue.add(() => loadImage());
+  }, [loadImage]);
 
   if (imageError) {
     return (
       <div className={`${className} bg-gray-200 flex items-center justify-center`}>
         <span className="text-gray-500">Image unavailable</span>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className={`${className} bg-gray-200 animate-pulse flex items-center justify-center`}>
+        <span className="text-gray-400">Loading...</span>
       </div>
     );
   }
@@ -33,7 +93,6 @@ const ImageWithFallback = ({ src, alt, className, style }) => {
       alt={alt}
       className={className}
       style={style}
-      onError={handleError}
       loading="lazy"
     />
   );
@@ -47,11 +106,31 @@ export const BlogPost = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  // Function to process content images
+  const processContentImages = useCallback((content) => {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+    
+    const images = tempDiv.getElementsByTagName('img');
+    Array.from(images).forEach((img) => {
+      img.className = 'w-full rounded-lg mb-6 object-cover';
+      img.style.maxHeight = '400px';
+      img.setAttribute('loading', 'lazy');
+    });
+    
+    return tempDiv.innerHTML;
+  }, []);
+
   const loadBlog = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
       const data = await blogService.getBlogById(id);
+      
+      if (data.content) {
+        data.content = processContentImages(data.content);
+      }
+      
       setBlog(data);
     } catch (error) {
       setError(error.message || 'Failed to load blog');
@@ -59,7 +138,7 @@ export const BlogPost = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [id, navigate]);
+  }, [id, navigate, processContentImages]);
 
   useEffect(() => {
     loadBlog();
@@ -126,17 +205,23 @@ export const BlogPost = () => {
       />
 
       <style>{`
+        .ql-editor {
+          padding: 0;
+        }
+        
         .ql-editor img {
-          display: block;
-          margin: 2rem auto;
-          max-width: 100%;
-          height: auto;
+          width: 100%;
+          max-height: 400px;
+          object-fit: cover;
+          border-radius: 0.5rem;
+          margin: 1.5rem 0;
         }
+        
         .prose {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
+          max-width: 100%;
+          width: 100%;
         }
+        
         .prose > * {
           width: 100%;
           text-align: justify;

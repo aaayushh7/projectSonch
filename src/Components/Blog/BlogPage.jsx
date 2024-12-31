@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import blogService from '../../api/blogService';
 import bg from '../../assets/hero.png';
 
+// Queue manager for image loading
+
 const SkeletonBlog = () => (
   <div className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse flex h-48">
     <div className="w-1/3 bg-slate-200"></div>
@@ -17,6 +19,36 @@ const SkeletonBlog = () => (
   </div>
 );
 
+class ImageLoadQueue {
+  constructor() {
+    this.queue = [];
+    this.isProcessing = false;
+  }
+
+  add(task) {
+    this.queue.push(task);
+    this.processNext();
+  }
+
+  async processNext() {
+    if (this.isProcessing || this.queue.length === 0) return;
+    
+    this.isProcessing = true;
+    const currentTask = this.queue.shift();
+    
+    try {
+      await currentTask();
+    } catch (error) {
+      console.error('Error processing image:', error);
+    }
+    
+    this.isProcessing = false;
+    this.processNext();
+  }
+}
+
+const imageQueue = new ImageLoadQueue();
+
 const ImageSkeleton = () => (
   <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
     <span className="text-gray-400">Loading...</span>
@@ -25,7 +57,7 @@ const ImageSkeleton = () => (
 
 const API_URL = 'https://api-sonch.vercel.app/api';
 
-const BlogCard = ({ blog }) => {
+const BlogCard = ({ blog, loadIndex }) => {
   const [imageStates, setImageStates] = useState({
     loaded: false,
     error: false,
@@ -33,61 +65,59 @@ const BlogCard = ({ blog }) => {
     isLoading: true
   });
   const MAX_RETRIES = 3;
+  const RETRY_DELAY = 1000;
 
   const content = blog.content.replace(/<[^>]*>/g, '');
   const preview = content.split(' ').slice(0, 150).join(' ') + (content.split(' ').length > 150 ? '...' : '');
 
-  const handleImageLoad = () => {
-    setImageStates(prev => ({
-      ...prev,
-      loaded: true,
-      error: false,
-      isLoading: false
-    }));
-  };
-
-  const handleImageError = () => {
-    setImageStates(prev => {
-      if (prev.retryCount < MAX_RETRIES) {
-        // Start loading state again for retry
-        const newState = {
+  const loadImage = () => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = `${API_URL}/images/${blog.bannerId}?retry=${imageStates.retryCount}`;
+      
+      img.onload = () => {
+        setImageStates(prev => ({
           ...prev,
-          isLoading: true,
-          retryCount: prev.retryCount + 1,
-          error: false
-        };
-        
-        setTimeout(() => {
-          const img = new Image();
-          img.src = `${API_URL}/images/${blog.bannerId}?retry=${newState.retryCount}`;
-          img.onload = handleImageLoad;
-          img.onerror = () => {
-            setImageStates(curr => ({
-              ...curr,
-              error: true,
-              isLoading: false
-            }));
+          loaded: true,
+          error: false,
+          isLoading: false
+        }));
+        resolve();
+      };
+
+      img.onerror = () => {
+        setImageStates(prev => {
+          if (prev.retryCount < MAX_RETRIES) {
+            setTimeout(() => {
+              imageQueue.add(() => loadImage());
+            }, RETRY_DELAY * (prev.retryCount + 1));
+            
+            return {
+              ...prev,
+              retryCount: prev.retryCount + 1,
+              isLoading: true
+            };
+          }
+          
+          return {
+            ...prev,
+            error: true,
+            isLoading: false
           };
-        }, 1000 * (prev.retryCount + 1));
-        
-        return newState;
-      }
-      return {
-        ...prev,
-        error: true,
-        isLoading: false
+        });
+        resolve();
       };
     });
   };
 
   useEffect(() => {
     if (blog.bannerId) {
-      setImageStates(prev => ({ ...prev, isLoading: true }));
-      // Preload image
-      const img = new Image();
-      img.src = `${API_URL}/images/${blog.bannerId}`;
-      img.onload = handleImageLoad;
-      img.onerror = handleImageError;
+      // Add delay based on card index to stagger initial loading
+      const initialDelay = loadIndex * 200; // 200ms delay between each card's initial load
+      
+      setTimeout(() => {
+        imageQueue.add(() => loadImage());
+      }, initialDelay);
     }
 
     return () => {
@@ -98,10 +128,10 @@ const BlogCard = ({ blog }) => {
         isLoading: true
       });
     };
-  }, [blog.bannerId]);
+  }, [blog.bannerId, loadIndex]);
 
   return (
-    <div className="bg-white shadow-lg border-4 border-blue-700 overflow-hidden hover:shadow-lg transition-shadow flex p-3 sm:h-[200px]">
+    <div className="bg-white shadow-lg border-4 border-blue-700 overflow-hidden hover:shadow-lg transition-shadow flex p-3 sm:h-[220px]">
       <div className="w-1/3 relative">
         {blog.bannerId ? (
           <>
@@ -112,8 +142,22 @@ const BlogCard = ({ blog }) => {
               className={`w-full h-full object-cover transition-opacity duration-300 ${
                 imageStates.loaded ? 'opacity-100' : 'opacity-0'
               } ${imageStates.error ? 'hidden' : 'block'}`}
-              onLoad={handleImageLoad}
-              onError={handleImageError}
+              onLoad={() => {
+                setImageStates(prev => ({
+                  ...prev,
+                  loaded: true,
+                  isLoading: false
+                }));
+              }}
+              onError={() => {
+                if (imageStates.retryCount >= MAX_RETRIES) {
+                  setImageStates(prev => ({
+                    ...prev,
+                    error: true,
+                    isLoading: false
+                  }));
+                }
+              }}
               loading="lazy"
             />
             {imageStates.error && (
@@ -228,14 +272,18 @@ export const BlogPage = () => {
           SONCH Blog
         </h1>
     
-        <div className="grid md:grid-cols-1 lg:grid-cols-1 p-6 gap-6">
+        <div className="grid md:grid-cols-1 lg:grid-cols-1 p-6 sm:p-[90px] gap-6">
           {isLoading ? (
             Array(6).fill(null).map((_, index) => (
               <SkeletonBlog key={index} />
             ))
           ) : (
-            blogs.map(blog => (
-              <BlogCard key={blog._id} blog={blog} />
+            blogs.map((blog, index) => (
+              <BlogCard 
+                key={blog._id} 
+                blog={blog} 
+                loadIndex={index} 
+              />
             ))
           )}
         </div>
