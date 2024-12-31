@@ -131,7 +131,7 @@ const BlogCard = ({ blog, loadIndex }) => {
   }, [blog.bannerId, loadIndex]);
 
   return (
-    <div className="bg-white shadow-lg border-4 border-blue-700 overflow-hidden hover:shadow-lg transition-shadow flex p-3 sm:h-[220px]">
+    <div className="bg-white shadow-lg border-4 border-blue-700 overflow-hidden hover:shadow-lg transition-shadow flex p-3 h-[150px] sm:h-[220px]">
       <div className="w-1/3 relative">
         {blog.bannerId ? (
           <>
