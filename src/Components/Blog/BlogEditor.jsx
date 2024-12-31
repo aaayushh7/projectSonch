@@ -42,30 +42,53 @@ export const BlogEditor = () => {
       setBannerPreview(URL.createObjectURL(file));
     }
   };
-
-  const API_URL = 'https://api-sonch.vercel.app/api';
-
   const imageHandler = useCallback(() => {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
     input.setAttribute('accept', 'image/*');
     input.click();
-
+  
     input.onchange = async () => {
       const file = input.files[0];
       if (file) {
         try {
-          const formData = new FormData();
-          formData.append('file', file);
-
-          const response = await blogService.uploadImage(file);
-          const imageUrl = `${API_URL}/images/${response.fileId}`;
-          
           const editor = quillRef.current.getEditor();
-          const range = editor.getSelection();
-          editor.insertEmbed(range.index, 'image', imageUrl);
+          const range = editor.getSelection(true);
+  
+          // Insert a loading placeholder
+          editor.insertText(range.index, 'Uploading image...');
+          const loadingRange = { index: range.index, length: 'Uploading image...'.length };
+  
+          try {
+            // Use direct file upload instead of base64
+            const response = await blogService.uploadImage(file);
+            
+            if (!response.fileId) {
+              throw new Error('Invalid server response');
+            }
+  
+            const imageUrl = blogService.getImageUrl(response.fileId);
+  
+            // Remove the loading placeholder and insert the image
+            editor.deleteText(loadingRange.index, loadingRange.length);
+            editor.insertEmbed(loadingRange.index, 'image', imageUrl);
+            
+            // Move cursor to next line
+            editor.setSelection(loadingRange.index + 1);
+          } catch (error) {
+            editor.deleteText(loadingRange.index, loadingRange.length);
+            console.error('Error uploading image:', error);
+            editor.insertText(loadingRange.index, 'Failed to upload image', {
+              color: 'red',
+              italic: true
+            });
+            setTimeout(() => {
+              editor.deleteText(loadingRange.index, 'Failed to upload image'.length);
+            }, 3000);
+          }
         } catch (error) {
-          console.error('Error uploading image:', error);
+          console.error('Error handling image:', error);
+          alert('Failed to process image. Please try again.');
         }
       }
     };
@@ -109,7 +132,6 @@ export const BlogEditor = () => {
         {id ? 'Edit Blog' : 'Create New Blog'}
       </h1>
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Banner Image Upload */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
             Banner Image
@@ -138,7 +160,6 @@ export const BlogEditor = () => {
           </div>
         </div>
 
-        {/* Title Input */}
         <div>
           <input
             type="text"
@@ -149,7 +170,6 @@ export const BlogEditor = () => {
           />
         </div>
 
-        {/* Content Editor */}
         <div className="h-96">
           <ReactQuill
             ref={quillRef}
@@ -161,7 +181,6 @@ export const BlogEditor = () => {
           />
         </div>
 
-        {/* Action Buttons */}
         <div className="flex gap-4 pt-4">
           <button
             type="submit"

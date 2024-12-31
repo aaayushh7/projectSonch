@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import blogService from '../../api/blogService';
-import bg from '../../assets/hero.png'
+import bg from '../../assets/hero.png';
 
 const SkeletonBlog = () => (
   <div className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse flex h-48">
@@ -16,25 +16,112 @@ const SkeletonBlog = () => (
     </div>
   </div>
 );
+
+const ImageSkeleton = () => (
+  <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
+    <span className="text-gray-400">Loading...</span>
+  </div>
+);
+
 const API_URL = 'https://api-sonch.vercel.app/api';
 
 const BlogCard = ({ blog }) => {
+  const [imageStates, setImageStates] = useState({
+    loaded: false,
+    error: false,
+    retryCount: 0,
+    isLoading: true
+  });
+  const MAX_RETRIES = 3;
+
   const content = blog.content.replace(/<[^>]*>/g, '');
   const preview = content.split(' ').slice(0, 150).join(' ') + (content.split(' ').length > 150 ? '...' : '');
 
+  const handleImageLoad = () => {
+    setImageStates(prev => ({
+      ...prev,
+      loaded: true,
+      error: false,
+      isLoading: false
+    }));
+  };
+
+  const handleImageError = () => {
+    setImageStates(prev => {
+      if (prev.retryCount < MAX_RETRIES) {
+        // Start loading state again for retry
+        const newState = {
+          ...prev,
+          isLoading: true,
+          retryCount: prev.retryCount + 1,
+          error: false
+        };
+        
+        setTimeout(() => {
+          const img = new Image();
+          img.src = `${API_URL}/images/${blog.bannerId}?retry=${newState.retryCount}`;
+          img.onload = handleImageLoad;
+          img.onerror = () => {
+            setImageStates(curr => ({
+              ...curr,
+              error: true,
+              isLoading: false
+            }));
+          };
+        }, 1000 * (prev.retryCount + 1));
+        
+        return newState;
+      }
+      return {
+        ...prev,
+        error: true,
+        isLoading: false
+      };
+    });
+  };
+
+  useEffect(() => {
+    if (blog.bannerId) {
+      setImageStates(prev => ({ ...prev, isLoading: true }));
+      // Preload image
+      const img = new Image();
+      img.src = `${API_URL}/images/${blog.bannerId}`;
+      img.onload = handleImageLoad;
+      img.onerror = handleImageError;
+    }
+
+    return () => {
+      setImageStates({
+        loaded: false,
+        error: false,
+        retryCount: 0,
+        isLoading: true
+      });
+    };
+  }, [blog.bannerId]);
+
   return (
-    <div className="bg-white shadow-lg border-4 border-blue-700 overflow-hidden hover:shadow-lg transition-shadow flex p-3">
-      <div className="w-1/3">
+    <div className="bg-white shadow-lg border-4 border-blue-700 overflow-hidden hover:shadow-lg transition-shadow flex p-3 sm:h-[200px]">
+      <div className="w-1/3 relative">
         {blog.bannerId ? (
-          <img
-            src={`${API_URL}/images/${blog.bannerId}`}
-            alt={blog.title}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.target.src = 'https://via.placeholder.com/300x200';
-              e.target.onerror = null;
-            }}
-          />
+          <>
+            {imageStates.isLoading && <ImageSkeleton />}
+            <img
+              src={`${API_URL}/images/${blog.bannerId}?retry=${imageStates.retryCount}`}
+              alt={blog.title}
+              className={`w-full h-full object-cover transition-opacity duration-300 ${
+                imageStates.loaded ? 'opacity-100' : 'opacity-0'
+              } ${imageStates.error ? 'hidden' : 'block'}`}
+              onLoad={handleImageLoad}
+              onError={handleImageError}
+              loading="lazy"
+            />
+            {imageStates.error && (
+              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-400">Failed to load image</span>
+              </div>
+            )}
+          </>
         ) : (
           <div className="w-full h-full bg-gray-200 flex items-center justify-center">
             <span className="text-gray-400">No image</span>
@@ -67,6 +154,11 @@ export const BlogPage = () => {
 
   const loadBlogs = async () => {
     try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        setIsAdmin(true);
+      }
+
       const cachedBlogs = sessionStorage.getItem('blogData');
       if (cachedBlogs) {
         setBlogs(JSON.parse(cachedBlogs));
@@ -75,8 +167,10 @@ export const BlogPage = () => {
       }
 
       const data = await blogService.getAllBlogs();
-      setBlogs(data);
-      sessionStorage.setItem('blogData', JSON.stringify(data));
+      if (Array.isArray(data)) {
+        setBlogs(data);
+        sessionStorage.setItem('blogData', JSON.stringify(data));
+      }
     } catch (error) {
       console.error('Error loading blogs:', error);
     } finally {
@@ -86,17 +180,24 @@ export const BlogPage = () => {
 
   useEffect(() => {
     loadBlogs();
-    setIsAdmin(!!localStorage.getItem('token'));
   }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      await blogService.login(loginData.email, loginData.password);
-      setIsAdmin(true);
-      setShowLoginModal(false);
+      const response = await blogService.login(loginData.email, loginData.password);
+      if (response?.token) {
+        localStorage.setItem('token', response.token);
+        setIsAdmin(true);
+        setShowLoginModal(false);
+        // Refresh blogs after login to get latest data
+        await loadBlogs();
+      } else {
+        throw new Error('Login failed - No token received');
+      }
     } catch (error) {
-      alert('Login failed');
+      console.error('Login error:', error);
+      alert('Login failed. Please check your credentials.');
     }
   };
 
@@ -105,6 +206,8 @@ export const BlogPage = () => {
     sessionStorage.removeItem('blogData');
     setIsAdmin(false);
     setShowAdminMenu(false);
+    // Refresh blogs after logout
+    loadBlogs();
   };
 
   return (
@@ -148,7 +251,6 @@ export const BlogPage = () => {
                 <i className="fas fa-plus"></i>
               </button>
               
-              {/* Admin Menu Popup */}
               {showAdminMenu && (
                 <div className="absolute bottom-16 right-0 bg-white rounded-lg shadow-lg overflow-hidden w-48">
                   <Link
